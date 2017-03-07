@@ -1,16 +1,14 @@
-'use strict';
+import {expect} from 'chai';
+import Random from 'random-js';
+import Trie from './src';
 
-var expect = require('chai').expect,
-    Random = require('random-js'),
-    Trie = require('./src');
-
-var random = new Random(Random.engines.mt19937().autoSeed());
+let random = new Random(Random.engines.mt19937().autoSeed());
 
 // NOTE: for testing purposes
-var MAX_KEY_LENGTH = 20;
+let MAX_KEY_LENGTH = 20;
 
 function randomValue () {
-  var length = random.integer(1, 13);
+  let length = random.integer(1, 13);
   return random.string(length);
 }
 
@@ -19,20 +17,20 @@ function getRandomKey(length) {
 }
 
 function getLongRandomKey () {
-  var length = random.integer(MAX_KEY_LENGTH / 2 + 1, MAX_KEY_LENGTH);
+  let length = random.integer(MAX_KEY_LENGTH / 2 + 1, MAX_KEY_LENGTH);
   return getRandomKey(length);
 }
 
 function getShortRandomKey () {
-  var length = random.integer(1, MAX_KEY_LENGTH / 2);
+  let length = random.integer(1, MAX_KEY_LENGTH / 2);
   return getRandomKey(length);
 }
 
 function getRandomTrie () {
-  var operations = random.integer(0, 100);
-  var trie = new Trie();
+  let operations = random.integer(0, 100);
+  let trie = new Trie();
 
-  for (var i = 0; i < operations; i++) {
+  for (let i = 0; i < operations; i++) {
 
     switch (random.integer(1, 3)) {
       case 1: trie.set(getLongRandomKey(), randomValue());    break;
@@ -47,16 +45,16 @@ function getRandomTrie () {
 function forAll (message, fn) {
 
   it(message, function () {
-    for (var i = 0; i < 100; i++) { fn(getRandomTrie()); }
+    for (let i = 0; i < 100; i++) { fn(getRandomTrie()); }
   });
 }
 
 describe('Trie#longestMatchingPrefix(key)', function () {
 
   forAll('should return the longest matching prefix node when the key starts with an existing key', function (trie) {
-    var value = randomValue();
-    var key = getShortRandomKey();
-    var result;
+    let value = randomValue();
+    let key = getShortRandomKey();
+    let result;
 
     trie.set(key, value);
 
@@ -67,9 +65,9 @@ describe('Trie#longestMatchingPrefix(key)', function () {
   });
 
   forAll('should behave like #get when given an existing key', function (trie) {
-    var value = randomValue();
-    var key = getShortRandomKey();
-    var result;
+    let value = randomValue();
+    let key = getShortRandomKey();
+    let result;
 
     trie.set(key, value);
 
@@ -80,7 +78,7 @@ describe('Trie#longestMatchingPrefix(key)', function () {
   });
 
   forAll('should behave like #get when given a non-existing key', function (trie) {
-    var result = trie.longestMatchingPrefix(getShortRandomKey());
+    let result = trie.longestMatchingPrefix(getShortRandomKey());
 
     expect(result.value).to.equal('');
     expect(result.key).to.equal('');
@@ -90,9 +88,9 @@ describe('Trie#longestMatchingPrefix(key)', function () {
 describe('Trie#get(key)', function () {
 
   forAll('should return a non-empty node when given an existing key', function (trie) {
-    var value = randomValue();
-    var key = getShortRandomKey();
-    var result;
+    let value = randomValue();
+    let key = getShortRandomKey();
+    let result;
 
     trie.set(key, value);
 
@@ -103,7 +101,7 @@ describe('Trie#get(key)', function () {
   });
 
   forAll('should return an empty node when given a non-existing key', function (trie) {
-    var result = trie.get(getRandomKey(MAX_KEY_LENGTH + 1));
+    let result = trie.get(getRandomKey(MAX_KEY_LENGTH + 1));
 
     expect(result.value).to.equal('');
     expect(result.key).to.equal('');
