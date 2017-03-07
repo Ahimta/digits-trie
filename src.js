@@ -1,120 +1,127 @@
-'use strict';
-
-(function (factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('digits-trie', function() {
-      return factory();
-    });
-  }
-  else if (typeof module === 'object' && module.exports) {
-    module.exports = factory();
+function isValidKey(key) {
+  if (typeof (key) !== 'string') {
+    return false;
   }
   else {
-    window.DigitsTrie = factory();
-  }
-})(function () {
-
-  function isValidKey (key) {
-    if (typeof (key) !== 'string') { return false; }
-    else {
-      for (var i = 0; i < key.length; i++) {
-        if (isNaN(parseInt(key[i]))) { return false; }
+    for (let i = 0; i < key.length; i++) {
+      if (isNaN(parseInt(key[i]))) {
+        return false;
       }
-
-      return true;
     }
-  }
 
-  function assertValidKey (key) {
-    if (!isValidKey(key)) { throw new Error('digits-trie: invalid key "' + key + '" -_-'); }
+    return true;
   }
+}
 
-  function isEmptyKey (key) {
-    return key.length === 0;
+function assertValidKey(key) {
+  if (!isValidKey(key)) {
+    throw new Error('digits-trie: invalid key "' + key + '" -_-');
   }
+}
 
-  function isEmptyNode (node) {
-    return !(node && node.key && node.value);
-  }
+function isEmptyKey(key) {
+  return key.length === 0;
+}
 
-  function Node() {
+function isEmptyNode(node) {
+  return !(node && node.key && node.value);
+}
+
+class Node {
+  constructor() {
     this.children = new Array(9);
   }
 
-  var Nil = new Node();
-  Nil.isNil = true;
-  Nil.value = '';
-  Nil.key = '';
-
-  Node.prototype.getChild = function(i) {
-    if      (i < 0 || i > 9)   { throw new Error('-_-');               }
-    else if (this.children[i]) { return this.children[i];              }
-    else                       { return this.children[i] = new Node(); }
+  getChild(i) {
+    if (i < 0 || i > 9) {
+      throw new Error('-_-');
+    }
+    else if (this.children[i]) {
+      return this.children[i];
+    }
+    else {
+      return this.children[i] = new Node();
+    }
   }
+}
 
-  function Trie () {
+let Nil = new Node();
+Nil.isNil = true;
+Nil.value = '';
+Nil.key = '';
+
+export default class Trie {
+  constructor() {
     this.root = new Node();
   }
 
-  Trie.prototype.set = function (key, value) {
+  set(key, value) {
     assertValidKey(key);
 
-    if (isEmptyKey(key)) { return; }
-    else {
-      var node = this.root;
+    if (!isEmptyKey(key)) {
+      let node = this.root;
 
-      for (var i = 0; i < key.length - 1; i++) {
-        var character = key[i];
-        var index = parseInt(character);
+      for (let i = 0; i < key.length - 1; i++) {
+        let character = key[i];
+        let index = parseInt(character);
         node = node.getChild(index);
       }
 
-      var newNode = node.getChild(parseInt(key[key.length-1]));
+      let newNode = node.getChild(parseInt(key[key.length - 1]));
       newNode.value = value;
       newNode.key = key;
     }
   }
 
-  Trie.prototype.get = function (key) {
+  get(key) {
     assertValidKey(key);
 
-    if (isEmptyKey(key)) { return Nil; }
+    if (isEmptyKey(key)) {
+      return Nil;
+    }
     else {
-      var node = this.root;
+      let node = this.root;
 
-      for (var i = 0; node && i < key.length; i++) {
-        var character = key[i];
-        var index = parseInt(character);
+      for (let i = 0; node && i < key.length; i++) {
+        let character = key[i];
+        let index = parseInt(character);
 
         node = node.children[index];
       }
 
-      if (!isEmptyNode(node)) { return node; }
-      else                    { return Nil;  }
+      if (!isEmptyNode(node)) {
+        return node;
+      }
+      else {
+        return Nil;
+      }
     }
   }
 
-  Trie.prototype.longestMatchingPrefix = function (key) {
+  longestMatchingPrefix(key) {
     assertValidKey(key);
 
-    if (isEmptyKey(key)) { return Nil; }
-    else {
-      var prevNode = null;
-      var node = this.root;
+    if (isEmptyKey(key)) {
+      return Nil;
+    } else {
+      let prevNode = null;
+      let node = this.root;
 
-      for (var i = 0; node && i < key.length; i++) {
-        var character = key[i];
-        var index = parseInt(character);
+      for (let i = 0; node && i < key.length; i++) {
+        let character = key[i];
+        let index = parseInt(character);
 
-        if (node.value) { prevNode = node };
+        if (node.value) {
+          prevNode = node
+        }
         node = node.children[index];
       }
 
-      if      (!isEmptyNode(node))     { return node;     }
-      else if (!isEmptyNode(prevNode)) { return prevNode; }
-      else                             { return Nil;      }
+      return !isEmptyNode(node)
+        ? node
+        : !isEmptyNode(prevNode)
+          ? prevNode
+          : Nil;
     }
   }
-
-  return Trie;
-});
+}
